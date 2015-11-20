@@ -46,11 +46,54 @@
 	</Reference>
   </ItemGroup>
   <ItemGroup>
+     <Compile Include="Assets\Scripts\ArrayOfTiles.cs" />
+     <Compile Include="Assets\Scripts\BattleController.cs" />
+     <Compile Include="Assets\Scripts\Character Classes\Amolador.cs" />
+     <Compile Include="Assets\Scripts\Character Classes\Atirador.cs" />
+     <Compile Include="Assets\Scripts\Character Classes\Barbeiro.cs" />
+     <Compile Include="Assets\Scripts\Character Classes\Cacador.cs" />
+     <Compile Include="Assets\Scripts\Character Classes\Campones.cs" />
+     <Compile Include="Assets\Scripts\Character Classes\Carpinteiro.cs" />
+     <Compile Include="Assets\Scripts\Character Classes\Carroceiro.cs" />
+     <Compile Include="Assets\Scripts\Character Classes\Cavaleiro.cs" />
+     <Compile Include="Assets\Scripts\Character Classes\CharacterClass.cs" />
+     <Compile Include="Assets\Scripts\Character Classes\Costureiro.cs" />
+     <Compile Include="Assets\Scripts\Character Classes\Desempregado.cs" />
+     <Compile Include="Assets\Scripts\Character Classes\Diacono.cs" />
+     <Compile Include="Assets\Scripts\Character Classes\Fazendeiro.cs" />
+     <Compile Include="Assets\Scripts\Character Classes\ImperadorDoBrasil.cs" />
+     <Compile Include="Assets\Scripts\Character Classes\Lenhador.cs" />
+     <Compile Include="Assets\Scripts\Character Classes\Matador.cs" />
+     <Compile Include="Assets\Scripts\Character Classes\Mecanico.cs" />
+     <Compile Include="Assets\Scripts\Character Classes\Monge.cs" />
+     <Compile Include="Assets\Scripts\Character Classes\Operario.cs" />
+     <Compile Include="Assets\Scripts\Character Classes\Padeiro.cs" />
+     <Compile Include="Assets\Scripts\Character Classes\Padre.cs" />
+     <Compile Include="Assets\Scripts\Character Classes\ParDeFranca.cs" />
+     <Compile Include="Assets\Scripts\Character Classes\Pedreiro.cs" />
+     <Compile Include="Assets\Scripts\Character Classes\Santo.cs" />
+     <Compile Include="Assets\Scripts\Character.cs" />
      <Compile Include="Assets\Scripts\Database.cs" />
+     <Compile Include="Assets\Scripts\Enemy.cs" />
      <Compile Include="Assets\Scripts\InterfaceController.cs" />
+     <Compile Include="Assets\Scripts\Items\Armor.cs" />
+     <Compile Include="Assets\Scripts\Items\Feet.cs" />
+     <Compile Include="Assets\Scripts\Items\Head.cs" />
+     <Compile Include="Assets\Scripts\Items\Item.cs" />
+     <Compile Include="Assets\Scripts\Items\Weapon.cs" />
+     <Compile Include="Assets\Scripts\Lerp.cs" />
+     <Compile Include="Assets\Scripts\Map.cs" />
+     <Compile Include="Assets\Scripts\MapLoader.cs" />
      <Compile Include="Assets\Scripts\Maps.cs" />
-     <Compile Include="Assets\Scripts\MenuOption.cs" />
-     <Compile Include="Assets\Scripts\menuSelect.cs" />
+     <Compile Include="Assets\Scripts\Menu.cs" />
+     <Compile Include="Assets\Scripts\ResolutionControl.cs" />
+     <Compile Include="Assets\Scripts\Tile.cs" />
+     <Compile Include="Assets\Scripts\WorldMap\Battle.cs" />
+     <Compile Include="Assets\Scripts\WorldMap\City.cs" />
+     <Compile Include="Assets\Scripts\WorldMap\Shop.cs" />
+     <Compile Include="Assets\Scripts\WorldMap\ShopOption.cs" />
+     <Compile Include="Assets\Scripts\WorldMap\UnitsOverview.cs" />
+     <Compile Include="Assets\Scripts\WorldMap\WorldMap.cs" />
  <Reference Include="UnityEngine.UI">
  <HintPath>C:/Program Files/Unity/Editor/Data/UnityExtensions/Unity/GUISystem/UnityEngine.UI.dll</HintPath>
  </Reference>
