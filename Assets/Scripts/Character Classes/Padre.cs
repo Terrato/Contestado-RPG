@@ -3,33 +3,26 @@ using System.Collections;
 
 public class Padre : CharacterClass {
 
-
-	public Padre() { }
-
-	public Padre(Diacono diacono) {
+	public Padre() {
 		name = "Padre";
-		description =	"Os desempregados são os recrutas iniciais do Exército " +
-						"antes de serem alocados à uma função específica.\n" +
-						"Eles perderam seus empregos e bens, porém jamais sua fé," +
-						" o que causou sua filiação com João Maria.";
 		level = 1;
 		exp = 0;
-		bonusStrength += 1 + diacono.bonusStrength;
-		bonusDexterity += 4 + diacono.bonusDexterity;
-		bonusAgility += 3 + diacono.bonusAgility;
-		bonusConstitution += 2 + diacono.bonusConstitution;
-		bonusWisdom += 6 + diacono.bonusWisdom;
-		bonusLife += 25 + diacono.bonusLife;
-		bonusFaith += 25 + diacono.bonusFaith;
+		bonusStrength += 1;
+		bonusDexterity += 4;
+		bonusAgility += 3;
+		bonusConstitution += 2;
+		bonusWisdom += 6;
+		bonusLife += 25;
+		bonusFaith += 25;
 		bonusFury = 0;
 		bonusPersistance = 0;
-		bonusAttack += 5 + diacono.bonusAttack;
-		bonusResCut += 1 + diacono.bonusResCut;
-		bonusResPierce += 1 + diacono.bonusResPierce;
-		bonusResBlunt += 4 + diacono.bonusResBlunt;
-		bonusResMoral += 6 + diacono.bonusResMoral;
-		bonusMove += 1 + diacono.bonusMove;
-		bonusJump += 0 + diacono.bonusJump;
+		bonusAttack += 5;
+		bonusResCut += 1;
+		bonusResPierce += 1;
+		bonusResBlunt += 4;
+		bonusResMoral += 6;
+		bonusMove += 1;
+		bonusJump += 0;
 	}
 
 	public override void LevelUp() {

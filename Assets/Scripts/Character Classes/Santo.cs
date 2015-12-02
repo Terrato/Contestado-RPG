@@ -3,32 +3,26 @@ using System.Collections;
 
 public class Santo : CharacterClass {
 
-	public Santo() { }
-
-	public Santo(Diacono diacono) {
+	public Santo() {
 		name = "Santo";
-		description =	"Os desempregados são os recrutas iniciais do Exército " +
-						"antes de serem alocados à uma função específica.\n" +
-						"Eles perderam seus empregos e bens, porém jamais sua fé," +
-						" o que causou sua filiação com João Maria.";
 		level = 1;
 		exp = 0;
-		bonusStrength += 1 + diacono.bonusStrength;
-		bonusDexterity += 3 + diacono.bonusDexterity;
-		bonusAgility += 4 + diacono.bonusAgility;
-		bonusConstitution += 5 + diacono.bonusConstitution;
-		bonusWisdom += 8 + diacono.bonusWisdom;
-		bonusLife += 20 + diacono.bonusLife;
-		bonusFaith += 50 + diacono.bonusFaith;
+		bonusStrength += 1;
+		bonusDexterity += 3;
+		bonusAgility += 4;
+		bonusConstitution += 5;
+		bonusWisdom += 8;
+		bonusLife += 20;
+		bonusFaith += 50;
 		bonusFury = 0;
 		bonusPersistance = 0;
-		bonusAttack += 15 + diacono.bonusAttack;
-		bonusResCut += 2 + diacono.bonusResCut;
-		bonusResPierce += 2 + diacono.bonusResPierce;
-		bonusResBlunt += 2 + diacono.bonusResBlunt;
-		bonusResMoral += 12 + diacono.bonusResMoral;
-		bonusMove += 0 + diacono.bonusMove;
-		bonusJump += 0 + diacono.bonusJump;
+		bonusAttack += 15;
+		bonusResCut += 2;
+		bonusResPierce += 2;
+		bonusResBlunt += 2;
+		bonusResMoral += 12;
+		bonusMove += 0;
+		bonusJump += 0;
 	}
 
 	public override void LevelUp() {

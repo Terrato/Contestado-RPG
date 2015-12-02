@@ -5,10 +5,6 @@ public class Desempregado : CharacterClass {
 
 	public Desempregado() {
 		name = "Desempregado";
-		description =	"Os desempregados são os recrutas iniciais do Exército " +
-						"antes de serem alocados à uma função específica.\n" +
-						"Eles perderam seus empregos e bens, porém jamais sua fé," +
-						" o que causou sua filiação com João Maria.";
 		level = 1;
 		exp = 0;
 		bonusStrength += 3;

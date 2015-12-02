@@ -3,32 +3,26 @@ using System.Collections;
 
 public class Matador : CharacterClass {
 
-	public Matador() { }
-
-	public Matador(Cacador cacador) {
+	public Matador() {
 		name = "Matador";
-		description =	"Os desempregados são os recrutas iniciais do Exército " +
-						"antes de serem alocados à uma função específica.\n" +
-						"Eles perderam seus empregos e bens, porém jamais sua fé," +
-						" o que causou sua filiação com João Maria.";
 		level = 1;
 		exp = 0;
-		bonusStrength += 6 + cacador.bonusStrength;
-		bonusDexterity += 6 + cacador.bonusDexterity;
-		bonusAgility += 3 + cacador.bonusAgility;
-		bonusConstitution += 2 + cacador.bonusConstitution;
-		bonusWisdom += 0 + cacador.bonusWisdom;
-		bonusLife += 25 + cacador.bonusLife;
-		bonusFaith += 50 + cacador.bonusFaith;
+		bonusStrength += 6;
+		bonusDexterity += 6;
+		bonusAgility += 3;
+		bonusConstitution += 2;
+		bonusWisdom += 0;
+		bonusLife += 25;
+		bonusFaith += 50;
 		bonusFury = 0;
 		bonusPersistance = 0;
-		bonusAttack += 25 + cacador.bonusAttack;
-		bonusResCut += 5 + cacador.bonusResCut;
-		bonusResPierce += 5 + cacador.bonusResPierce;
-		bonusResBlunt += 5 + cacador.bonusResBlunt;
-		bonusResMoral += 5 + cacador.bonusResMoral;
-		bonusMove = 1 + cacador.bonusMove;
-		bonusJump = 1 + cacador.bonusJump;
+		bonusAttack += 25;
+		bonusResCut += 5;
+		bonusResPierce += 5;
+		bonusResBlunt += 5;
+		bonusResMoral += 5;
+		bonusMove = 1;
+		bonusJump = 1;
 	}
 
 	public override void LevelUp() {

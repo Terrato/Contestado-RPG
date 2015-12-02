@@ -5,7 +5,7 @@ using System.Collections;
 
 public class InterfaceController : MonoBehaviour  {
 	public GameObject battlefieldView, orthographicView; // Camera da visão geral e da visão de mira respectivamente
-	public static GameObject staticBattlefieldView, staticOrthographicView;
+	public GameObject charFace;
 	private static int[] cursorPositionArray = new int[2];
 	public GameObject cursor;
 	public Menu menu;
@@ -25,8 +25,6 @@ public class InterfaceController : MonoBehaviour  {
 
 		menuOptionLock = false;
 		menuActiveLock = false;
-		staticBattlefieldView = battlefieldView;
-		staticOrthographicView = orthographicView;
 		cursor.SetActive(false);
 		centerOfRotation = GameObject.Find("Center of Rotation").transform;
 
@@ -52,20 +50,6 @@ public class InterfaceController : MonoBehaviour  {
 			stateOfRotation == 2 && battlefieldView.activeSelf ) {
 			battlefieldView.transform.RotateAround(centerOfRotation.position, Vector3.up, -3f);
 		}
-
-		// Máquina de estados para a aproximação do Battlefield View
-		if ((menuOptionLock == false && menuActiveLock == false) &&
-			stateOfGapClosing == 1 && battlefieldView.activeSelf && zLimit < 10 ) {
-			battlefieldView.transform.Translate(0f, 0f, 0.4f);
-			zLimit += 0.4f;
-		}
-		if ((menuOptionLock == false && menuActiveLock == false) &&
-			stateOfGapClosing == 2 && battlefieldView.activeSelf && zLimit >= -10)  {
-			battlefieldView.transform.Translate(0f, 0f, -0.4f);
-			zLimit -= 0.4f;
-		}
-
-
 	}
 
 	// ------------------------------------------------------
@@ -116,7 +100,7 @@ public class InterfaceController : MonoBehaviour  {
 	public void SwitchCameras() {
 		currentCameraState = !currentCameraState; // Inverte o estado do currentCameraState
 		// Se for false o Battlefield View se ativa, caso contrário o Orthographic View
-		if (menuOptionLock == false) {
+		
 			if (currentCameraState == false) {
 				canvas.worldCamera = battlefieldView.GetComponent<Camera>();
 				battlefieldView.SetActive(true);
@@ -127,58 +111,26 @@ public class InterfaceController : MonoBehaviour  {
 				battlefieldView.SetActive(false);
 				orthographicView.SetActive(true);
 				cursor.SetActive(true);
-				CursorAim();
 			}
-		}
+		
 	}
 
-	// Tem que aplicar uma lógica similar a do Aim nos Moves
-	public void CursorMoveUp() {
-		if (menuOptionLock == false && menuActiveLock == false) {
-			if (yCoordinateCursor < Maps.map01[0].Length - 1 ) {
-				yCoordinateCursor++;
-				orthographicView.transform.position = new Vector3(Maps.map01[xCoordinateCursor][yCoordinateCursor].transform.position.x, 30, Maps.map01[xCoordinateCursor][yCoordinateCursor].transform.position.z);
-			}
-		}
-
+	public void ForceCamera() {
+		currentCameraState = true;
+		canvas.worldCamera = orthographicView.GetComponent<Camera>();
+		battlefieldView.SetActive(false);
+		orthographicView.SetActive(true);
+		cursor.SetActive(true);
 	}
 
-	public void CursorMoveDown() {
-		if (menuOptionLock == false && menuActiveLock == false) {
-			if (yCoordinateCursor > 0 ) {
-				yCoordinateCursor--;
-				orthographicView.transform.position = new Vector3(Maps.map01[xCoordinateCursor][yCoordinateCursor].transform.position.x, 30, Maps.map01[xCoordinateCursor][yCoordinateCursor].transform.position.z);
-			}
-		}
-	}
 
-	public void CursorMoveLeft() {
+	// UTILIZAR ESSA MERDA
+	public void CursorAim(GameObject player) {
 		if (menuOptionLock == false && menuActiveLock == false) {
-			if (xCoordinateCursor > 0 ) {
-				xCoordinateCursor--;
-				orthographicView.transform.position = new Vector3(Maps.map01[xCoordinateCursor][yCoordinateCursor].transform.position.x, 30, Maps.map01[xCoordinateCursor][yCoordinateCursor].transform.position.z);
-			}
-		}
-	}
-
-	public void CursorMoveRight() {
-		if (menuOptionLock == false && menuActiveLock == false) {
-			if (xCoordinateCursor < Maps.map01.Length - 1 ) {
-				xCoordinateCursor++;
-				orthographicView.transform.position = new Vector3(Maps.map01[xCoordinateCursor][yCoordinateCursor].transform.position.x, 30, Maps.map01[xCoordinateCursor][yCoordinateCursor].transform.position.z);//Translate(new Vector3(2, 0, 0));
-			}
-		}		
-	}
-
-	public void CursorAim() {
-		if (menuOptionLock == false && menuActiveLock == false) {
-			Character player = GameObject.Find("Player").GetComponent<Character>();// cursor get coordinates
-			xCoordinateCursor = player.xPosition;
-			yCoordinateCursor = player.yPosition;
+			xCoordinateCursor = player.GetComponent<Character>().xPosition;
+			yCoordinateCursor = player.GetComponent<Character>().yPosition;
 			orthographicView.transform.position = new Vector3(player.transform.position.x, 30, player.transform.position.z);
 		}
-			
-		
 	}
 
 	// Retorna null se o ocupante for null, caso contrário as coordenadas XY
@@ -202,19 +154,4 @@ public class InterfaceController : MonoBehaviour  {
 
 
 
-
-	// DELETAR DEPOIS, PARA FINS DE TESTE APENAS
-	// DEU MERDA AQUI
-	public void _ASDASDASDAS() {
-		int a = 1	, b = 0;
-		Character asd = GameObject.Find("Player").GetComponent<Character>();
-		asd.SetPosition(Maps.map01, a, b);
-		asd.ShowMovementRange(Maps.map01, a, b);
-		asd.ShowAttackRange(Maps.map01, a, b, "");
-
-		int q = 4, w = 5;
-		Character asd2 = GameObject.Find("Player2").GetComponent<Character>();
-		asd2.SetPosition(Maps.map01, q, w);
-		asd2.ShowMovementRange(Maps.map01, q, w);
-	}
 }

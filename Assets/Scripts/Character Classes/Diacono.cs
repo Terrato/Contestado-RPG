@@ -3,32 +3,26 @@ using System.Collections;
 
 public class Diacono : CharacterClass {
 
-	public Diacono() { }
-
-	public Diacono(Desempregado desempregado) {
+	public Diacono() {
 		name = "Diácono";
-		description =	"Os desempregados são os recrutas iniciais do Exército " +
-						"antes de serem alocados à uma função específica.\n" +
-						"Eles perderam seus empregos e bens, porém jamais sua fé," +
-						" o que causou sua filiação com João Maria.";
 		level = 1;
 		exp = 0;
-		bonusStrength += 1 + desempregado.bonusStrength;
-		bonusDexterity += 3 + desempregado.bonusDexterity;
-		bonusAgility += 1 + desempregado.bonusAgility;
-		bonusConstitution += 2 + desempregado.bonusConstitution;
-		bonusWisdom += 5 + desempregado.bonusWisdom;
-		bonusLife += 25 + desempregado.bonusLife;
+		bonusStrength += 1;
+		bonusDexterity += 3;
+		bonusAgility += 1;
+		bonusConstitution += 2;
+		bonusWisdom += 5;
+		bonusLife += 25;
 		bonusFaith += 50;
 		bonusFury = 0;
 		bonusPersistance = 0;
-		bonusAttack += 5 + desempregado.bonusAttack;
-		bonusResCut += 0 + desempregado.bonusResCut;
-		bonusResPierce += 0 + desempregado.bonusResPierce;
-		bonusResBlunt += 3 + desempregado.bonusResBlunt;
-		bonusResMoral += 5 + desempregado.bonusResMoral;
-		bonusMove = 0 + desempregado.bonusMove;
-		bonusJump = -1 + desempregado.bonusJump;
+		bonusAttack += 5;
+		bonusResCut += 0;
+		bonusResPierce += 0;
+		bonusResBlunt += 3;
+		bonusResMoral += 5;
+		bonusMove = 0 ;
+		bonusJump = -1;
 	}
 
 	public override void LevelUp() {

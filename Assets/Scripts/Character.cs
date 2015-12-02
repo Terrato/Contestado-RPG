@@ -6,11 +6,17 @@ using System.Collections.Generic;
 public class Character : MonoBehaviour {
 
 	public string publicCharacterName;
-	public Sprite characterFace;
-	
-	public CharacterClass characterClass { get; set; }
+	public Sprite characterFace, characterBody, characterSprite;
+	public bool turn = false, moving, attacking, moved, attacked;
+	public Button buttonMove, buttonAttack, buttonSkill, buttonItem, buttonStatus, buttonEnd;
+	public GameObject camera1, camera2, statusScreen, descriptionGameObject;
+	public BattleController battleController;
+	public InterfaceController interfaceController;
+	public Color color;
+	public CharacterClass characterClass;
+
 	public Text description,
-		visibleName, visibleClass,
+		visibleName, visibleNameHUD, visibleClass, visibleClassHUD, visibleClassLevelHUD,
 		baseStrength, classStrength, totalStrength,
 		baseDexterity, classDexterity, totalDexterity,
 		baseAgility, classAgility, totalAgility,
@@ -24,12 +30,12 @@ public class Character : MonoBehaviour {
 		baseResBlunt, classResBlunt, totalResBlunt,
 		baseResMoral, classResMoral, totalResMoral, 
 		visibleMove, visibleJump, visibleReach, visibleTurnCooldown,
-		hudCurrentLife, hudCurrentResource, hudMaxLife, hudMaxResource;
+		currentLifeHUD, currentResourceHUD, maxLifeHUD, maxResourceHUD, HPHUD, MPHUD;
 		
 	private GameObject characterGameObject;
 	private Canvas canvas;
 	private bool isShowingActionMenu;
-	public static string  characterName = "Zé Mané Ipsum";		// Nome
+	public string characterName;				// Nome
 	public int	characterStrength = 5,			// Aumenta o ataque com Cajados, Martelos, Machados e Lanças. Reduz a penalidade de peso do equipamento. Reduz o Tempo de Recarga de habilidades de Persistência.
 				characterDexterity = 5,			// Aumenta o ataque com Espadas, Pistolas, Rifles e Arcos. Aumenta a taxa de acerto. Reduz Tempo de Recarga de habilidades de Fé.
 				characterAgility = 5,			// Reduz o Turn Cooldown. Aumenta a taxa de esquiva. Reduz o Tempo de Recarga de habilidades de Fúria.
@@ -48,8 +54,9 @@ public class Character : MonoBehaviour {
 				characterJump = 2,				// Pulo
 				characterReach = 1,				// Alcance. Pré-determinado como 1, será alterado com a arma utilizada.
 				turnCooldown;					// Determina a ordem de ação na batalha, quanto menor for, maior a prioridade do personagem.
+	public int currentLife, currentResource;
 
-	public int totalCharacterStrength {get;set;}	
+	public int totalCharacterStrength {get;set;}
 	public int totalCharacterDexterity {get;set;}	
 	public int totalCharacterAgility {get;set;}	
 	public int totalCharacterConstitution {get;set;}
@@ -62,84 +69,108 @@ public class Character : MonoBehaviour {
 	public int totalCharacterResCut {get;set;}		
 	public int totalCharacterResPierce {get;set;}	
 	public int totalCharacterResBlunt {get;set;}	
-	public int totalCharacterResMoral {get;set;}	
-	public int totalCharacterMove {get;set;}		
-	public int totalCharacterJump {get;set;}		
-	public int totalCharacterReach { get; set; }	
+	public int totalCharacterResMoral {get;set;}
+	public int totalCharacterMove {get;set;}
+	public int totalCharacterJump {get;set;}
+	public int totalCharacterReach {get;set;}
 
-	public int	xPosition, yPosition;
+	public int	xPosition, yPosition, targetXPosition, targetYPosition;
 
-	private Desempregado desempregado = new Desempregado();
-		private Diacono diacono;
-			private Padre padre;
-			private Monge monge;
-			private Santo santo;
-		private Cacador cacador;
-			private Atirador atirador;
-			private Matador matador;
-		private Campones campones;
-			private Lenhador lenhador;
-				private Carpinteiro carpinteiro;
-			private Operario operario;
-				private Pedreiro pedreiro;
-			private Amolador amolador;
-				private Barbeiro barbeiro;
-		private Fazendeiro fazendeiro;
-			private Padeiro padeiro;
-			private Costureiro costureiro;
-		private Carroceiro carroceiro;
-			private Cavaleiro cavaleiro;
-			private Mecanico mecanico;
-
-
+	private string[] nameArray = new string[] { "José", "João", "Márcio", "Álvaro", "Bartolomeu", "Horácio", "Irineu", "Jairo", "Moacir", "Plínio", "Saulo" };
+	private string[] surnameArray = new string[] { " da Silva", " Souza", " de Oliveira Quatro", " Grütner", " Bortoluzzi", " Spaghetti", " Peperonni", " Paparetutti" };
 	
+	public CharacterClass[] classArray;
+
+	public Tile currentTile;
 
 	// Use this for initialization
 	void Awake () {
-		//menu = new Menu(this);
-		characterGameObject = this.gameObject;
-		canvas = GameObject.Find("Canvas").GetComponent<Canvas>();
 
-		characterClass = desempregado;
+		characterAttack = Random.Range(10, 25);
+		characterLife = Random.Range(100, 125);
+
+		color = this.gameObject.GetComponent<Renderer>().material.color;
+
+		string pickedName = nameArray[Random.Range(0, nameArray.Length)] + surnameArray[Random.Range(0, surnameArray.Length)];
+		characterName = pickedName;
+
+		characterClass = classArray[Random.Range(0, classArray.Length)];
+		
+		characterClass.exp = 999999;
+		for (int i = 0; i < Random.Range(50, 70); i++) {
+			characterClass.LevelUp();
+		}
+
+		RefreshHPMP();
+
+		currentLife = totalCharacterLife;
+		if (characterClass.bonusFaith != 0) {
+			currentResource = characterClass.bonusFaith;
+		}
+		if (characterClass.bonusPersistance != 0) {
+			currentResource = characterClass.bonusPersistance;
+		}
+		if (characterClass.bonusFury != 0) {
+			currentResource = characterClass.bonusFury;
+		}
+
+		characterGameObject = this.gameObject;
+				
 		RefreshStatusValues();
 		RefreshStatusText();
-
-		diacono = new Diacono(desempregado);
-			padre = new Padre(diacono);
-			monge = new Monge(diacono);
-			santo = new Santo(diacono);
-		cacador = new Cacador(desempregado);
-			atirador = new Atirador(cacador);
-			matador = new Matador(cacador);
-		campones = new Campones();//desempregado);
-			lenhador = new Lenhador();//campones);
-				carpinteiro = new Carpinteiro();//lenhador);
-			operario = new Operario();//campones);
-				pedreiro = new Pedreiro();//operario);
-			amolador = new Amolador();//campones);
-				barbeiro = new Barbeiro();//amolador);
-		fazendeiro = new Fazendeiro();//desempregado);
-			padeiro = new Padeiro();//fazendeiro);
-			costureiro = new Costureiro();//fazendeiro);
-		carroceiro = new Carroceiro();//desempregado);
-			cavaleiro = new Cavaleiro();//carroceiro);
-			mecanico = new Mecanico();//carroceiro);
-		
-		//ShowMovementRange(Maps.map01, xPosition, yPosition);
-		//ShowAttackRange(Maps.map01, xPosition, yPosition, "Sword");
-		//ExecuteMovement(CharacterClassDatabase.ShowMovementRange(Maps.map01, xPosition, yPosition), xPosition + move, yPosition);
-	}
+		}
 
 	// Update is called once per frame
 	void FixedUpdate () {
+		if (InterfaceController.currentCameraState) {
+			this.gameObject.transform.rotation = Quaternion.Euler(new Vector3(90, 0, 0));
+		} else {
+			this.gameObject.transform.LookAt(camera2.transform.position, Vector3.up);
+		}
+	}
 
+	public void TakeHPDamage(int damage, int reduction) {
+		int damageToBeTaken = damage - reduction;
 
+		if (damageToBeTaken <= 0) {
+			damageToBeTaken = 1;
+		}
+
+		if (damage >= currentLife) {
+			currentLife -= damageToBeTaken;
+			Die();
+		} else {
+			currentLife -= damageToBeTaken;
+			currentLifeHUD.text = currentLife.ToString();
+		}
+		
+	}
+
+	public void Die() {
+		this.gameObject.SetActive(false);
+	}
+
+	public void RefreshHPMP(){
+		if (characterClass.bonusFaith != 0) {
+			totalCharacterFaith = characterFaith + characterClass.bonusFaith;			
+		}
+		if (characterClass.bonusFury != 0) {
+			totalCharacterFaith = characterFaith + characterClass.bonusFury;
+		}
+		if (characterClass.bonusPersistance != 0) {
+			totalCharacterFaith = characterFaith + characterClass.bonusPersistance;
+		}
+		totalCharacterJump = characterJump + characterClass.bonusJump;
+		totalCharacterLife = characterLife + characterClass.bonusLife;
 	}
 
 	public void RefreshStatusText() {
 		description.text = "";
 		visibleName.text = characterName;
+		visibleNameHUD.text = characterName;
 		visibleClass.text = characterClass.name + ", Nível " + characterClass.level;
+		visibleClassHUD.text = characterClass.name;
+		visibleClassLevelHUD.text = "NV " + characterClass.level;
 		baseStrength.text = characterStrength.ToString();
 		classStrength.text = characterClass.bonusStrength.ToString();
 		totalStrength.text = totalCharacterStrength.ToString();
@@ -151,34 +182,42 @@ public class Character : MonoBehaviour {
 		totalAgility.text = totalCharacterAgility.ToString();
 		baseConstitution.text = characterConstitution.ToString();
 		classConstitution.text = characterClass.bonusConstitution.ToString();
-		totalConstitution.text = totalConstitution.ToString();
+		totalConstitution.text = totalCharacterConstitution.ToString();
 		baseWisdom.text = characterWisdom.ToString();
 		classWisdom.text = characterClass.bonusWisdom.ToString();
 		totalWisdom.text = totalCharacterWisdom.ToString();
 		baseLife.text = characterLife.ToString();
 		classLife.text = characterClass.bonusLife.ToString();
 		totalLife.text = totalCharacterLife.ToString();
-		hudMaxLife.text = totalLife.ToString();
+		currentLifeHUD.text = currentLife.ToString();
+		HPHUD.text = "PV";
+		maxLifeHUD.text = totalLife.text;
 		if (characterClass.bonusFaith !=0) {
-			resourceName.text = "FÉ";
+			resourceName.text = "Fé";
+			MPHUD.text = "FE";
 			baseResource.text = "0";
 			classResource.text = characterClass.bonusFaith.ToString();
 			totalResource.text = classResource.text;
-			hudMaxResource.text = totalResource.ToString();
+			currentResourceHUD.text = currentResource.ToString();
+			maxResourceHUD.text = totalResource.text;
 		}
 		if (characterClass.bonusFury != 0) {
-			resourceName.text = "FUR";
+			resourceName.text = "Fúria";
+			MPHUD.text = "FR";
 			baseResource.text = "0";
 			classResource.text = characterClass.bonusFury.ToString();
 			totalResource.text = classResource.text;
-			hudMaxResource.text = totalResource.ToString();
+			currentResourceHUD.text = currentResource.ToString();
+			maxResourceHUD.text = totalResource.text;
 		}
 		if (characterClass.bonusPersistance != 0) {
-			resourceName.text = "PER";
+			resourceName.text = "Persistência";
+			MPHUD.text = "PR";
 			baseResource.text = "0";
 			classResource.text = characterClass.bonusPersistance.ToString();
 			totalResource.text = classResource.text;
-			hudMaxResource.text = totalResource.ToString();
+			currentResourceHUD.text = currentResource.ToString();
+			maxResourceHUD.text = totalResource.text;
 		}
 		baseAttack.text = characterAttack.ToString();
 		classAttack.text = characterClass.bonusAttack.ToString();
@@ -195,15 +234,15 @@ public class Character : MonoBehaviour {
 		baseResMoral.text = characterResMoral.ToString();
 		classResMoral.text = characterClass.bonusResMoral.ToString();
 		totalResMoral.text = totalCharacterResMoral.ToString();
-		visibleMove.text = "Movimentação: "+characterMove.ToString();
-		visibleJump.text = "Pulo: " + characterJump.ToString();
-		visibleReach.text = "Alcance: " + characterReach.ToString();
+		visibleMove.text = "Movimentação: " + totalCharacterMove.ToString();
+		visibleJump.text = "Pulo: " + totalCharacterJump.ToString();
+		visibleReach.text = "Alcance: " + totalCharacterReach.ToString();
 		visibleTurnCooldown.text = "Iniciativa: " + turnCooldown.ToString();
 	}
 
 	public void RefreshStatusValues() {
 		totalCharacterAgility = characterAgility + characterClass.bonusAgility;
-		//totalCharacterAttack = characterAttack + characterClass.bonusAttack + weapon.attack;
+		totalCharacterAttack = characterAttack + characterClass.bonusAttack;// + weapon.attack;
 		totalCharacterConstitution = characterConstitution + characterClass.bonusConstitution;
 		totalCharacterDexterity = characterDexterity + characterClass.bonusDexterity;
 		totalCharacterFaith = characterFaith + characterClass.bonusFaith;
@@ -212,41 +251,145 @@ public class Character : MonoBehaviour {
 		totalCharacterLife = characterLife + characterClass.bonusLife;
 		totalCharacterMove = characterMove + characterClass.bonusMove;
 		totalCharacterPersistance = characterPersistance + characterClass.bonusPersistance;
-		//totalCharacterReach = characterReach + weapon.reach;
-		//totalCharacterResBlunt = characterResBlunt + head.resBlunt + armor.resBlunt + feet.resBlunt;
-		//totalCharacterResCut = characterResCut + head.resCut + armor.resCut + feet.resCut;
-		//totalCharacterResMoral = characterResMoral + head.resMoral + armor.resMoral + feet.resMoral;
-		//totalCharacterResPierce = characterResPierce + head.resPierce + armor.resPierce + feet.resPierce;
-		totalCharacterStrength = characterStrength + characterClass.bonusStrength;
-		totalCharacterWisdom = characterWisdom + characterClass.bonusWisdom;
+		totalCharacterReach = characterReach + characterClass.bonusReach; // + WEAPON REACH
+		totalCharacterResBlunt = characterResBlunt + characterClass.bonusResBlunt; // + head.resBlunt + armor.resBlunt + feet.resBlunt;
+		totalCharacterResCut = characterResCut + characterClass.bonusResCut;// +head.resCut + armor.resCut + feet.resCut;
+		totalCharacterResMoral = characterResMoral + characterClass.bonusResMoral;// +head.resMoral + armor.resMoral + feet.resMoral;
+		totalCharacterResPierce = characterResPierce + characterClass.bonusResPierce;// +head.resPierce + armor.resPierce + feet.resPierce;
+		totalCharacterStrength = characterStrength +characterClass.bonusStrength;
+		totalCharacterWisdom = characterWisdom +characterClass.bonusWisdom;
 	}
 
+	public void StartTurn() {
 
-	public void ChangeClass() {
+		interfaceController.CursorAim(this.gameObject);	
 
+		RefreshHPMP();
+		RefreshStatusText();
+		RefreshStatusValues();
+
+		UnityEngine.Events.UnityAction moveSelf = () => {
+			if (moving) {
+				HideRange(ShowMovementRange(Maps.map01, xPosition, yPosition));
+				interfaceController.charFace.GetComponent<Animator>().SetBool("Appear", true);
+			} else {
+				interfaceController.ForceCamera();
+				interfaceController.CursorAim(this.gameObject);
+				interfaceController.charFace.GetComponent<Animator>().SetBool("Appear", false);
+				ShowMovementRange(Maps.map01, xPosition, yPosition);
+			}};
+		UnityEngine.Events.UnityAction attackSelf = () => {
+			if (attacking) {
+				HideRange(ShowAttackRange(Maps.map01, xPosition, yPosition));
+				interfaceController.charFace.GetComponent<Animator>().SetBool("Appear", true);
+			} else {
+				interfaceController.ForceCamera();
+				interfaceController.CursorAim(this.gameObject);
+				ShowAttackRange(Maps.map01, xPosition, yPosition);
+				interfaceController.charFace.GetComponent<Animator>().SetBool("Appear", false);
+			}};
+		UnityEngine.Events.UnityAction skillSelf = () => {  };
+		UnityEngine.Events.UnityAction itemSelf = () => {  };
+		UnityEngine.Events.UnityAction statusSelf = () => { AlterStatus(); };
+		UnityEngine.Events.UnityAction endTurn = () => { EndTurn(); };
+
+		buttonMove.GetComponent<Button>().interactable = true;
+		buttonAttack.GetComponent<Button>().interactable = true;
+		buttonSkill.GetComponent<Button>().interactable = true;
+		buttonItem.GetComponent<Button>().interactable = true;
+		buttonStatus.GetComponent<Button>().interactable = true;
+		buttonEnd.GetComponent<Button>().interactable = true;
+
+		buttonMove.onClick.AddListener(moveSelf);
+		buttonAttack.onClick.AddListener(attackSelf);
+		buttonSkill.onClick.AddListener(skillSelf);
+		buttonItem.onClick.AddListener(itemSelf);
+		buttonStatus.onClick.AddListener(statusSelf);
+		buttonEnd.onClick.AddListener(endTurn);
+	}
+
+	public bool EndTurn() {
+
+		interfaceController.charFace.GetComponent<Animator>().SetBool("Appear", true);
+
+		buttonMove.GetComponent<Button>().interactable = false;
+		buttonAttack.GetComponent<Button>().interactable = false;
+		buttonSkill.GetComponent<Button>().interactable = false;
+		buttonItem.GetComponent<Button>().interactable = false;
+		buttonStatus.GetComponent<Button>().interactable = false;
+		buttonEnd.GetComponent<Button>().interactable = false;
+
+		buttonMove.onClick.RemoveAllListeners();
+		buttonAttack.onClick.RemoveAllListeners();
+		buttonSkill.onClick.RemoveAllListeners();
+		buttonItem.onClick.RemoveAllListeners();
+		buttonStatus.onClick.RemoveAllListeners();
+		buttonEnd.onClick.RemoveAllListeners();
+		turn = false;
+		
+		battleController.whoIsActive++;
+
+		if (battleController.whoIsActive >= battleController.array.Length) {
+			battleController.whoIsActive = 0;
+			print(battleController.whoIsActive);
+		}
+
+		battleController.SetActiveUnit(battleController.whoIsActive);
+		//print("ALLY " + battleController.whoIsActive);
+
+		this.gameObject.GetComponent<Renderer>().material.color = color;
+		return true;
 	}
 
 	public void ShowChangeClassMenu() {
 
 	}
 
-	public void ShowStatus() {
+	public void AlterStatus() {
+		statusScreen.gameObject.SetActive(!statusScreen.activeSelf);
 
+		if (moved == false) {
+			buttonMove.interactable = !buttonMove.interactable;			
+		}
+		if (attacked == false) {
+			buttonAttack.interactable = !buttonAttack.interactable;
+		}
+		buttonSkill.interactable = !buttonSkill.interactable;
+		buttonItem.interactable = !buttonItem.interactable;
+		buttonEnd.interactable = !buttonEnd.interactable;
 	}
 
 	public void ShowLearntSkills() {
 
 	}
 
-	public void ExecuteAttack() {
-
+	public void SetPosition(Tile[][] array, int positionX, int positionY) {
+		xPosition = positionX;
+		yPosition = positionY;
+		array[positionX][positionY].occupant = this.gameObject;
+		array[xPosition][yPosition].isOccupiedByAlly = true;
+		this.gameObject.transform.position = new Vector3(array[positionX][positionY].gameObject.transform.position.x
+															, array[positionX][positionY].gameObject.transform.localScale.y
+															, array[positionX][positionY].gameObject.transform.position.z);
+		
 	}
 
-	public void SetPosition(Tile[][] array, int positionX, int positionY) {
-		array[positionX][positionY].occupant = this.gameObject;
+	public void ResetPosition(Tile[][] array) {
+		array[xPosition][yPosition].occupant = null;
+		array[xPosition][yPosition].isOccupiedByAlly = false;
 	}
 
 	public List<Tile> ShowMovementRange(Tile[][] array, int positionX, int positionY) {
+
+		moving = !moving;
+
+		if (attacked == false) {
+			buttonAttack.interactable = !buttonAttack.interactable;
+		}
+		buttonSkill.interactable = !buttonSkill.interactable;
+		buttonItem.interactable = !buttonItem.interactable;
+		buttonStatus.interactable = !buttonStatus.interactable;
+		buttonEnd.interactable = !buttonEnd.interactable;
 
 		xPosition = positionX;
 		yPosition = positionY;
@@ -257,15 +400,15 @@ public class Character : MonoBehaviour {
 		List<Tile> nextToVisit = new List<Tile>(CheckNeighbours(array, positionX, positionY));
 		// Seta a posição inicial como impassável
 		array[positionX][positionY].occupant = this.gameObject;
-		characterGameObject.gameObject.transform.position = new Vector3(array[positionX][positionY].gameObject.transform.position.x
-															,array[positionX][positionY].gameObject.transform.position.y + array[positionX][positionY].gameObject.transform.localScale.y + 0.5f
-															,array[positionX][positionY].gameObject.transform.position.z);
+		this.gameObject.transform.position = new Vector3(array[positionX][positionY].gameObject.transform.position.x
+															, array[positionX][positionY].gameObject.transform.localScale.y
+															, array[positionX][positionY].gameObject.transform.position.z);
 
 		// Lista que possuirá todos os tiles cujo o personagem pode passar por
 		List<Tile> movementRange = new List<Tile>();
 			
 		// Gera a lista de tiles pelo quais o personagem pode se mexer
-		for (int i = 0; i < characterMove; i++) {
+		for (int i = 0; i < totalCharacterMove; i++) {
 			// Lista Borda que possui todos os tiles pelos quais o personagem pode passar por, conforme
 			// seu status Move e Jump.
 			List<Tile> border = new List<Tile>();
@@ -284,7 +427,8 @@ public class Character : MonoBehaviour {
 					}
 					// Se a borda não ter o dito vizinho, adiciona o vizinho à ela
 					if (neighbour != border.Contains(neighbour) &&
-						differenceOfHeigth <= characterJump) {
+						neighbour == null &&
+						differenceOfHeigth <= totalCharacterJump) {
 						//print("Tile Analisado (" + tile + ") / Vizinho Analisado (" + neighbour + ") / Diferença de altura = " + differenceOfHeigth);
 						border.Add(neighbour);
 					} 
@@ -319,36 +463,49 @@ public class Character : MonoBehaviour {
 		// Pinta de azul tudo o que pode ser movimentado sobre
 		foreach (Tile tile in movementRange) {
 			if (tile.occupant == null) {
-				tile.gameObject.GetComponent<Renderer>().material.color = Color.blue;
+				tile.gameObject.GetComponent<Tile>().plane.GetComponent<Renderer>().material.color = Color.blue;
+				tile.canBeClicked = true;
 			}
 				
 		}
 
 		// Retorna os tiles pelo qual o personagem pode chegar à
-		return movementRange;
+		return movementRange;		
 	}
 
-	public List<Tile> ShowAttackRange(Tile[][] array, int positionX, int positionY, string typeOfWeapon) {
+	public List<Tile> ShowAttackRange(Tile[][] array, int positionX, int positionY) {
+
+		attacking = !attacking;
+
+		if (moved == false) {
+			buttonMove.interactable = !buttonMove.interactable;			
+		}
+
+		buttonSkill.interactable = !buttonSkill.interactable;
+		buttonItem.interactable = !buttonItem.interactable;
+		buttonStatus.interactable = !buttonStatus.interactable;
+		buttonEnd.interactable = !buttonEnd.interactable;
+
+		xPosition = positionX;
+		yPosition = positionY;
+
 		// Lista de tiles visitados
 		List<Tile> visitedPositions = new List<Tile>();
 		// Lista com os próximos tiles a serem visitados
-		List<Tile> nextToVisit = new List<Tile>(CheckNeighbours(array, positionX, positionY));
-		// Seta a posição inicial como impassável
-		array[positionX][positionY].occupant = this.gameObject;
-			
+		List<Tile> nextToVisit = new List<Tile>(CheckNeighboursAttack(array, positionX, positionY));
 
 		// Lista que possuirá todos os tiles cujo o personagem pode atacar
 		List<Tile> autoAttackRange = new List<Tile>();
 
 		// Gera a lista de tiles pelo quais o personagem pode se mexer
-		for (int i = 0; i < characterReach; i++) {
+		for (int i = 0; i < totalCharacterReach; i++) {
 			// Lista Borda que possui todos os tiles pelos quais o personagem pode passar por, conforme
 			// seu status Move e Jump.
 			List<Tile> border = new List<Tile>();
 
 			foreach (Tile tile in nextToVisit) {
 				// Lista de posições vizinhas ao tile
-				List<Tile> neighbours = CheckNeighbours(array, tile.xCoordinate, tile.yCoordinate);
+				List<Tile> neighbours = CheckNeighboursAttack(array, tile.xCoordinate, tile.yCoordinate);
 
 				// Iteração sobre as posições vizinhas
 				foreach (Tile neighbour in neighbours) {
@@ -373,10 +530,11 @@ public class Character : MonoBehaviour {
 			}
 			foreach (Tile tile in visitedPositions) {
 				// Lista de tiles vizinhos e checados
-				List<Tile> checkedNeighbours = CheckNeighbours(array, tile.xCoordinate, tile.yCoordinate);
+				List<Tile> checkedNeighbours = CheckNeighboursAttack(array, tile.xCoordinate, tile.yCoordinate);
 				// foreach que adiciona as posições vizinhas contanto que não haja iguais
 				foreach (Tile neighbours in checkedNeighbours) {
-					if (neighbours != nextToVisit.Contains(neighbours)) {
+					if (neighbours != array[xPosition][yPosition] &&
+						neighbours != nextToVisit.Contains(neighbours)) {
 						nextToVisit.Add(neighbours);
 					}
 				}
@@ -388,8 +546,9 @@ public class Character : MonoBehaviour {
 
 		// Pinta de vermelho tudo o que pode ser atacado
 		foreach (Tile tile in autoAttackRange) {
-			if (tile.occupant == null) {
-				tile.gameObject.GetComponent<Renderer>().material.color = Color.red;
+			tile.gameObject.GetComponent<Tile>().plane.GetComponent<Renderer>().material.color = Color.red;
+			if (tile.occupant != null) {
+				tile.canBeClicked = true;
 			}
 		}
 
@@ -397,27 +556,63 @@ public class Character : MonoBehaviour {
 		return autoAttackRange;
 	}
 
-	public void ExecuteMovement(List<Tile> movementRange, int targetPositionX, int targetPositionY) {
+	public void HideRange(List<Tile> list) {
 
-		//print(movementRange.Count);
-		foreach (Tile item in movementRange) {
-			//print(item);
+		moving = false;
+		attacking = false;
+
+		foreach (Tile tile in list) {
+			tile.gameObject.GetComponent<Tile>().plane.GetComponent<Renderer>().material.color = tile.color;
+			tile.canBeClicked = false;
 		}
+	}
 
+	public void ExecuteMovement(Tile target, int targetPositionX, int targetPositionY) {
+		
+		List<Tile> moveRange = ShowMovementRange(Maps.map01, xPosition, yPosition);
+		interfaceController.charFace.GetComponent<Animator>().SetBool("Appear", true);
+		// TEM QUE ESVAZIAR A POSIÇÃO INICIAL - PORRA QUE NOJO DA MINHA SOLUÇÃO
+		ResetPosition(Maps.map01);
 
-		foreach (Tile tile in movementRange) {
-			if (tile.name == targetPositionX+","+targetPositionY) {
-				tile.gameObject.GetComponent<Renderer>().material.color = Color.black;
-				characterGameObject.transform.position = tile.transform.position;
-				characterGameObject.transform.position = new Vector3(tile.transform.position.x 
-					,(tile.gameObject.transform.position.y + tile.gameObject.transform.localScale.y + 1),
-						tile.transform.position.z);
-				break;
-			}
+		xPosition = targetPositionX;
+		yPosition = targetPositionY;
+
+		HideRange(moveRange);
+
+		target.occupant = this.gameObject;
+		target.isOccupiedByAlly = true;
+		target.plane.gameObject.GetComponent<Renderer>().material.color = target.color;
+		characterGameObject.transform.position = new Vector3(target.transform.position.x
+										, target.gameObject.transform.localScale.y
+										, target.transform.position.z);
+		
+		buttonMove.interactable = false;
+		moved = true;
+
+		RefreshHPMP();
+		RefreshStatusText();
+		RefreshStatusValues();
+	}
+
+	public void ExecuteAttack(Tile target, int targetPositionX, int targetPositionY) {
+
+		List<Tile> attackRange = ShowAttackRange(Maps.map01, xPosition, yPosition);
+
+		HideRange(attackRange);
+
+		buttonAttack.interactable = false;
+		attacked = true;
+		interfaceController.charFace.GetComponent<Animator>().SetBool("Appear", true);
+
+		if (target.isOccupiedByAlly) {
+			Character targetAlly = target.occupant.GetComponent<Character>();
+			targetAlly.TakeHPDamage(totalCharacterAttack, targetAlly.totalCharacterResCut);
+			targetAlly.RefreshHPMP();
 		}
-
-
-
+		if (target.isOccupiedByEnemy) {
+			Enemy targetEnemy = target.occupant.GetComponent<Enemy>();
+			targetEnemy.TakeHPDamage(totalCharacterAttack, targetEnemy.armor);
+		}
 	}
 
 	// Métodos privados --------------------------------------------------------------------
@@ -434,7 +629,7 @@ public class Character : MonoBehaviour {
 					int positionYAuxiliary = positionY + j;
 
 					if (((positionXAuxiliary < 0) || (positionXAuxiliary >= array.Length)) ||
-						((positionYAuxiliary < 0) || (positionYAuxiliary >= array.Length))) {
+						((positionYAuxiliary < 0) || (positionYAuxiliary >= array[0].Length))) {
 						// O continue possui lógica negada
 						// Tipo, ele exclui os casos referidos no if da iteração do for
 						continue;
@@ -452,12 +647,55 @@ public class Character : MonoBehaviour {
 
 					// Condicionais de vizinhança
 					// Estão atualmente limitadas por ocupação do tile e status de pulo do personagem
-					if (array[positionXAuxiliary][positionY].occupant == null &&
-						differenceOfHeigth1 <= characterJump) {
+					if (array[positionXAuxiliary][positionY].isOccupiedByEnemy == false &&
+						differenceOfHeigth1 <= totalCharacterJump) {
 						listOfAdjacentTiles.Add(array[positionXAuxiliary][positionY]);
 					}
-					if (array[positionX][positionYAuxiliary].occupant == null &&
-						differenceOfHeigth2 <= characterJump) {
+					if (array[positionX][positionYAuxiliary].isOccupiedByEnemy == false &&
+						differenceOfHeigth2 <= totalCharacterJump) {
+						listOfAdjacentTiles.Add(array[positionX][positionYAuxiliary]);
+					}
+
+				}
+			}
+		}
+		return listOfAdjacentTiles;
+	}
+
+	private List<Tile> CheckNeighboursAttack(Tile[][] array, int positionX, int positionY) {
+		// Lista que será retornada
+		List<Tile> listOfAdjacentTiles = new List<Tile>();
+
+		// fors que vão de -1 à 1 para pegar as posições adjacentes
+		for (int i = -1; i <= 1; i++) {
+			for (int j = -1; j <= 1; j++) {
+				// if para prevenir que a posição estipulada no método seja iterada sobre
+				if (i != 0 && j != 0) {
+					int positionXAuxiliary = positionX + i;
+					int positionYAuxiliary = positionY + j;
+
+					if (((positionXAuxiliary < 0) || (positionXAuxiliary >= array.Length)) ||
+						((positionYAuxiliary < 0) || (positionYAuxiliary >= array[0].Length))) {
+						// O continue possui lógica negada
+						// Tipo, ele exclui os casos referidos no if da iteração do for
+						continue;
+					}
+
+					// Diferenças de altura, cada uma para a sua condicional em questão, ambas positivas
+					int differenceOfHeigth1 = array[positionX][positionY].height - array[positionXAuxiliary][positionY].height;
+					int differenceOfHeigth2 = array[positionX][positionY].height - array[positionX][positionYAuxiliary].height;
+					if (differenceOfHeigth1 < 0) {
+						differenceOfHeigth1 = differenceOfHeigth1 * (-1);
+					}
+					if (differenceOfHeigth2 < 0) {
+						differenceOfHeigth2 = differenceOfHeigth2 * (-1);
+					}
+
+					// Condicionais de vizinhança
+					if (differenceOfHeigth1 <= totalCharacterReach) {
+						listOfAdjacentTiles.Add(array[positionXAuxiliary][positionY]);
+					}
+					if (differenceOfHeigth2 <= totalCharacterReach) {
 						listOfAdjacentTiles.Add(array[positionX][positionYAuxiliary]);
 					}
 

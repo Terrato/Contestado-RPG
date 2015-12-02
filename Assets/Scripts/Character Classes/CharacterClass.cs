@@ -23,7 +23,8 @@ public class CharacterClass : MonoBehaviour {
 	public int bonusResMoral { get; set; }
 	public int bonusMove { get; set; }
 	public int bonusJump { get; set; }
-
+	public int bonusReach { get; set; }
+	
 
 	public virtual void LevelUp() {
 
@@ -47,4 +48,6 @@ public class CharacterClass : MonoBehaviour {
 		print("RESB " + bonusResBlunt);
 		print("RESM " + bonusResMoral);
 	}
+
+	
 }

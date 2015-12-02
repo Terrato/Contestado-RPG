@@ -3,32 +3,27 @@ using System.Collections;
 
 public class Cacador : CharacterClass {
 
-	public Cacador() { }
-
-	public Cacador(Desempregado desempregado) {
+	public Cacador() {
 		name = "Caçador";
-		description =	"Os desempregados são os recrutas iniciais do Exército " +
-						"antes de serem alocados à uma função específica.\n" +
-						"Eles perderam seus empregos e bens, porém jamais sua fé," +
-						" o que causou sua filiação com João Maria.";
 		level = 1;
 		exp = 0;
-		bonusStrength += 1 + desempregado.bonusStrength;
-		bonusDexterity += 3 + desempregado.bonusDexterity;
-		bonusAgility += 5 + desempregado.bonusAgility;
-		bonusConstitution += 3 + desempregado.bonusConstitution;
-		bonusWisdom += 2 + desempregado.bonusWisdom;
-		bonusLife += 35 + desempregado.bonusLife;
+		bonusStrength += 1;
+		bonusDexterity += 3;
+		bonusAgility += 5;
+		bonusConstitution += 3;
+		bonusWisdom += 2;
+		bonusLife += 35;
 		bonusFaith += 30;
 		bonusFury = 0;
 		bonusPersistance = 0;
-		bonusAttack += 10 + desempregado.bonusAttack;
-		bonusResCut += 2 + desempregado.bonusResCut;
-		bonusResPierce += 4 + desempregado.bonusResPierce;
-		bonusResBlunt += 1 + desempregado.bonusResBlunt;
-		bonusResMoral += 1 + desempregado.bonusResMoral;
-		bonusMove = 0 + desempregado.bonusMove;
-		bonusJump = 0 + desempregado.bonusJump;
+		bonusAttack += 10;
+		bonusResCut += 2;
+		bonusResPierce += 4 ;
+		bonusResBlunt += 1;
+		bonusResMoral += 1;
+		bonusMove = 0;
+		bonusJump = 0;
+		bonusReach = 3;
 	}
 
 	public override void LevelUp() {

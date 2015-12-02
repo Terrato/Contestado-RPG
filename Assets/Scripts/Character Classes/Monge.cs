@@ -3,32 +3,26 @@ using System.Collections;
 
 public class Monge : CharacterClass {
 
-	public Monge() { }
-
-	public Monge(Diacono diacono) {
+	public Monge() {
 		name = "Monge";
-		description =	"Os desempregados são os recrutas iniciais do Exército " +
-						"antes de serem alocados à uma função específica.\n" +
-						"Eles perderam seus empregos e bens, porém jamais sua fé," +
-						" o que causou sua filiação com João Maria.";
 		level = 1;
 		exp = 0;
-		bonusStrength += 7 + diacono.bonusStrength;
-		bonusDexterity += 3 + diacono.bonusDexterity;
-		bonusAgility += 5 + diacono.bonusAgility;
-		bonusConstitution += 3 + diacono.bonusConstitution;
-		bonusWisdom += 2 + diacono.bonusWisdom;
-		bonusLife += 50 + diacono.bonusLife;
-		bonusFaith += 10 + diacono.bonusFaith;
+		bonusStrength += 7;
+		bonusDexterity += 3;
+		bonusAgility += 5;
+		bonusConstitution += 3;
+		bonusWisdom += 2;
+		bonusLife += 50;
+		bonusFaith += 10;
 		bonusFury = 0;
 		bonusPersistance = 0;
-		bonusAttack += 25 + diacono.bonusAttack;
-		bonusResCut += 5 + diacono.bonusResCut;
-		bonusResPierce += 3 + diacono.bonusResPierce;
-		bonusResBlunt += 8 + diacono.bonusResBlunt;
-		bonusResMoral += 2 + diacono.bonusResMoral;
-		bonusMove += 1 + diacono.bonusMove;
-		bonusJump += 1 + diacono.bonusJump;
+		bonusAttack += 25;
+		bonusResCut += 5;
+		bonusResPierce += 3;
+		bonusResBlunt += 8;
+		bonusResMoral += 2 ;
+		bonusMove += 1;
+		bonusJump += 1;
 	}
 
 	public override void LevelUp() {

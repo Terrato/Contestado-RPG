@@ -27,7 +27,7 @@ public class ArrayOfTiles : MonoBehaviour {
 		}
 		
 		// Uma lista que contém todos as parcelas da arrayOfTiles splitada
-		List<Tile[]> splitted = new List<Tile[]>();//This list will contain all the splitted arrays.
+		List<Tile[]> splitted = new List<Tile[]>(); // This list will contain all the splitted arrays.
 		int lengthToSplit = quantityOfYCoordinates;
 		int arrayLength = arrayOfTiles.Length;
 
