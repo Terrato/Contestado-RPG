@@ -23,6 +23,10 @@ public class Monge : CharacterClass {
 		bonusResMoral += 2 ;
 		bonusMove += 1;
 		bonusJump += 1;
+		weaponArray = new string[] { "Marreta", "Bastão", "Porrete", "Martelo" };
+		headArray = new string[] { "Bandana", "Chapéu de couro", "Coroa de cipó" };
+		bodyArray = new string[] { "Camiseta", "Colete", "Robe", "Camisa"};
+		feetArray = new string[] { "Sapatos", "Botinas", "Botas" };
 	}
 
 	public override void LevelUp() {

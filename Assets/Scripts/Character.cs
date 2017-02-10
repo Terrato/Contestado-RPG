@@ -6,14 +6,17 @@ using System.Collections.Generic;
 public class Character : MonoBehaviour {
 
 	public string publicCharacterName;
-	public Sprite characterFace, characterBody, characterSprite;
 	public bool turn = false, moving, attacking, moved, attacked;
-	public Button buttonMove, buttonAttack, buttonSkill, buttonItem, buttonStatus, buttonEnd;
+	public Button buttonMove, buttonAttack, buttonStatus, buttonEnd, confirm, cancel;  // buttonSkill, buttonItem,
 	public GameObject camera1, camera2, statusScreen, descriptionGameObject;
 	public BattleController battleController;
 	public InterfaceController interfaceController;
 	public Color color;
 	public CharacterClass characterClass;
+	public int damageCaused;
+	public Image charFace, statusCharFace, charPanel;
+	public GameObject menuSkills, mSkill1, mSkill2, mSkill3, mSkill4;
+	public Text mSkill1Text, mSkill2Text, mSkill3Text, mSkill4Text;
 
 	public Text description,
 		visibleName, visibleNameHUD, visibleClass, visibleClassHUD, visibleClassLevelHUD,
@@ -30,7 +33,8 @@ public class Character : MonoBehaviour {
 		baseResBlunt, classResBlunt, totalResBlunt,
 		baseResMoral, classResMoral, totalResMoral, 
 		visibleMove, visibleJump, visibleReach, visibleTurnCooldown,
-		currentLifeHUD, currentResourceHUD, maxLifeHUD, maxResourceHUD, HPHUD, MPHUD;
+		currentLifeHUD, currentResourceHUD, maxLifeHUD, maxResourceHUD, HPHUD, MPHUD,
+		weapon, head, body, feet;
 		
 	private GameObject characterGameObject;
 	private Canvas canvas;
@@ -76,6 +80,8 @@ public class Character : MonoBehaviour {
 
 	public int	xPosition, yPosition, targetXPosition, targetYPosition;
 
+	public List<Tile> targetArea;
+
 	private string[] nameArray = new string[] { "José", "João", "Márcio", "Álvaro", "Bartolomeu", "Horácio", "Irineu", "Jairo", "Moacir", "Plínio", "Saulo" };
 	private string[] surnameArray = new string[] { " da Silva", " Souza", " de Oliveira Quatro", " Grütner", " Bortoluzzi", " Spaghetti", " Peperonni", " Paparetutti" };
 	
@@ -86,6 +92,11 @@ public class Character : MonoBehaviour {
 	// Use this for initialization
 	void Awake () {
 
+		targetXPosition = -1;
+		targetYPosition = -1;
+
+		
+
 		characterAttack = Random.Range(10, 25);
 		characterLife = Random.Range(100, 125);
 
@@ -95,8 +106,8 @@ public class Character : MonoBehaviour {
 		characterName = pickedName;
 
 		characterClass = classArray[Random.Range(0, classArray.Length)];
-		
 		characterClass.exp = 999999;
+		characterClass.PickEquipments();
 		for (int i = 0; i < Random.Range(50, 70); i++) {
 			characterClass.LevelUp();
 		}
@@ -115,6 +126,7 @@ public class Character : MonoBehaviour {
 		}
 
 		characterGameObject = this.gameObject;
+		this.gameObject.GetComponent<SpriteRenderer>().sprite = characterClass.charBody;
 				
 		RefreshStatusValues();
 		RefreshStatusText();
@@ -127,27 +139,36 @@ public class Character : MonoBehaviour {
 		} else {
 			this.gameObject.transform.LookAt(camera2.transform.position, Vector3.up);
 		}
+		if (currentLife <= 0) {
+			Die();
+		}
 	}
 
-	public void TakeHPDamage(int damage, int reduction) {
-		int damageToBeTaken = damage - reduction;
+	public int TakeHPDamage(int damage, int reduction) {
+		int damageToBeTaken = (int)((damage - reduction) * Random.Range(0.8f, 1f));
 
 		if (damageToBeTaken <= 0) {
 			damageToBeTaken = 1;
+			damageCaused = damageToBeTaken;
+			return damageToBeTaken;
 		}
-
+		
 		if (damage >= currentLife) {
 			currentLife -= damageToBeTaken;
-			Die();
+			damageCaused = damageToBeTaken;
+			return damageToBeTaken;
 		} else {
 			currentLife -= damageToBeTaken;
 			currentLifeHUD.text = currentLife.ToString();
+			damageCaused = damageToBeTaken;
+			return damageToBeTaken;
 		}
-		
 	}
 
 	public void Die() {
 		this.gameObject.SetActive(false);
+		Maps.map01[xPosition][yPosition].occupant = null;
+		Maps.map01[xPosition][yPosition].isOccupiedByAlly = false;
 	}
 
 	public void RefreshHPMP(){
@@ -238,6 +259,10 @@ public class Character : MonoBehaviour {
 		visibleJump.text = "Pulo: " + totalCharacterJump.ToString();
 		visibleReach.text = "Alcance: " + totalCharacterReach.ToString();
 		visibleTurnCooldown.text = "Iniciativa: " + turnCooldown.ToString();
+		weapon.text = characterClass.weapon;
+		head.text = characterClass.head;
+		body.text = characterClass.body;
+		feet.text = characterClass.feet;
 	}
 
 	public void RefreshStatusValues() {
@@ -262,6 +287,14 @@ public class Character : MonoBehaviour {
 
 	public void StartTurn() {
 
+		print(battleController.whoIsActive);
+
+		charFace.sprite = characterClass.charFace;
+		statusCharFace.sprite = characterClass.charFace;
+
+		this.gameObject.GetComponent<Renderer>().material.color = Color.green;
+		charPanel.color = new Color32(0, 142, 13, 255);
+
 		interfaceController.CursorAim(this.gameObject);	
 
 		RefreshHPMP();
@@ -271,6 +304,11 @@ public class Character : MonoBehaviour {
 		UnityEngine.Events.UnityAction moveSelf = () => {
 			if (moving) {
 				HideRange(ShowMovementRange(Maps.map01, xPosition, yPosition));
+				confirm.onClick.RemoveAllListeners();
+				cancel.onClick.RemoveAllListeners();
+				ShowMenuButtons();
+				targetXPosition = -1;
+				targetYPosition = -1;
 				interfaceController.charFace.GetComponent<Animator>().SetBool("Appear", true);
 			} else {
 				interfaceController.ForceCamera();
@@ -281,6 +319,11 @@ public class Character : MonoBehaviour {
 		UnityEngine.Events.UnityAction attackSelf = () => {
 			if (attacking) {
 				HideRange(ShowAttackRange(Maps.map01, xPosition, yPosition));
+				confirm.onClick.RemoveAllListeners();
+				cancel.onClick.RemoveAllListeners();
+				ShowMenuButtons();
+				targetXPosition = -1;
+				targetYPosition = -1;
 				interfaceController.charFace.GetComponent<Animator>().SetBool("Appear", true);
 			} else {
 				interfaceController.ForceCamera();
@@ -288,22 +331,42 @@ public class Character : MonoBehaviour {
 				ShowAttackRange(Maps.map01, xPosition, yPosition);
 				interfaceController.charFace.GetComponent<Animator>().SetBool("Appear", false);
 			}};
-		UnityEngine.Events.UnityAction skillSelf = () => {  };
+		UnityEngine.Events.UnityAction skillSelf = () => {
+			if (attacking) {
+
+				confirm.onClick.RemoveAllListeners();
+				cancel.onClick.RemoveAllListeners();
+				HideMenuSkills();
+				ShowMenuButtons();
+				targetXPosition = -1;
+				targetYPosition = -1;
+				interfaceController.charFace.GetComponent<Animator>().SetBool("Appear", true);
+			} else {
+				interfaceController.ForceCamera();
+				interfaceController.CursorAim(this.gameObject);
+				ShowMenuSkills();
+
+				interfaceController.charFace.GetComponent<Animator>().SetBool("Appear", false);
+			}
+		};
 		UnityEngine.Events.UnityAction itemSelf = () => {  };
-		UnityEngine.Events.UnityAction statusSelf = () => { AlterStatus(); };
+		UnityEngine.Events.UnityAction statusSelf = () => {
+			AlterStatus();
+			interfaceController.CursorAim(this.gameObject);
+		};
 		UnityEngine.Events.UnityAction endTurn = () => { EndTurn(); };
 
 		buttonMove.GetComponent<Button>().interactable = true;
 		buttonAttack.GetComponent<Button>().interactable = true;
-		buttonSkill.GetComponent<Button>().interactable = true;
-		buttonItem.GetComponent<Button>().interactable = true;
+		//buttonSkill.GetComponent<Button>().interactable = true;
+		//buttonItem.GetComponent<Button>().interactable = true;
 		buttonStatus.GetComponent<Button>().interactable = true;
 		buttonEnd.GetComponent<Button>().interactable = true;
 
 		buttonMove.onClick.AddListener(moveSelf);
 		buttonAttack.onClick.AddListener(attackSelf);
-		buttonSkill.onClick.AddListener(skillSelf);
-		buttonItem.onClick.AddListener(itemSelf);
+		//buttonSkill.onClick.AddListener(skillSelf);
+		//buttonItem.onClick.AddListener(itemSelf);
 		buttonStatus.onClick.AddListener(statusSelf);
 		buttonEnd.onClick.AddListener(endTurn);
 	}
@@ -314,15 +377,16 @@ public class Character : MonoBehaviour {
 
 		buttonMove.GetComponent<Button>().interactable = false;
 		buttonAttack.GetComponent<Button>().interactable = false;
-		buttonSkill.GetComponent<Button>().interactable = false;
-		buttonItem.GetComponent<Button>().interactable = false;
+		//buttonSkill.GetComponent<Button>().interactable = false;
+		//buttonItem.GetComponent<Button>().interactable = false;
 		buttonStatus.GetComponent<Button>().interactable = false;
 		buttonEnd.GetComponent<Button>().interactable = false;
+		menuSkills.SetActive(false);
 
 		buttonMove.onClick.RemoveAllListeners();
 		buttonAttack.onClick.RemoveAllListeners();
-		buttonSkill.onClick.RemoveAllListeners();
-		buttonItem.onClick.RemoveAllListeners();
+		//buttonSkill.onClick.RemoveAllListeners();
+		//buttonItem.onClick.RemoveAllListeners();
 		buttonStatus.onClick.RemoveAllListeners();
 		buttonEnd.onClick.RemoveAllListeners();
 		turn = false;
@@ -335,14 +399,12 @@ public class Character : MonoBehaviour {
 		}
 
 		battleController.SetActiveUnit(battleController.whoIsActive);
-		//print("ALLY " + battleController.whoIsActive);
+
+		moved = false;
+		attacked = false;
 
 		this.gameObject.GetComponent<Renderer>().material.color = color;
 		return true;
-	}
-
-	public void ShowChangeClassMenu() {
-
 	}
 
 	public void AlterStatus() {
@@ -354,13 +416,9 @@ public class Character : MonoBehaviour {
 		if (attacked == false) {
 			buttonAttack.interactable = !buttonAttack.interactable;
 		}
-		buttonSkill.interactable = !buttonSkill.interactable;
-		buttonItem.interactable = !buttonItem.interactable;
+		//buttonSkill.interactable = !buttonSkill.interactable;
+		//buttonItem.interactable = !buttonItem.interactable;
 		buttonEnd.interactable = !buttonEnd.interactable;
-	}
-
-	public void ShowLearntSkills() {
-
 	}
 
 	public void SetPosition(Tile[][] array, int positionX, int positionY) {
@@ -381,15 +439,13 @@ public class Character : MonoBehaviour {
 
 	public List<Tile> ShowMovementRange(Tile[][] array, int positionX, int positionY) {
 
-		moving = !moving;
+		moving = true;
 
-		if (attacked == false) {
-			buttonAttack.interactable = !buttonAttack.interactable;
-		}
-		buttonSkill.interactable = !buttonSkill.interactable;
-		buttonItem.interactable = !buttonItem.interactable;
-		buttonStatus.interactable = !buttonStatus.interactable;
-		buttonEnd.interactable = !buttonEnd.interactable;
+		buttonAttack.interactable = false;
+		//buttonSkill.interactable = false;
+		//buttonItem.interactable = false;
+		buttonStatus.interactable = false;
+		buttonEnd.interactable = false;
 
 		xPosition = positionX;
 		yPosition = positionY;
@@ -475,16 +531,13 @@ public class Character : MonoBehaviour {
 
 	public List<Tile> ShowAttackRange(Tile[][] array, int positionX, int positionY) {
 
-		attacking = !attacking;
+		attacking = true;
 
-		if (moved == false) {
-			buttonMove.interactable = !buttonMove.interactable;			
-		}
-
-		buttonSkill.interactable = !buttonSkill.interactable;
-		buttonItem.interactable = !buttonItem.interactable;
-		buttonStatus.interactable = !buttonStatus.interactable;
-		buttonEnd.interactable = !buttonEnd.interactable;
+		buttonMove.interactable = false;
+		//buttonSkill.interactable = false;
+		//buttonItem.interactable = false;
+		buttonStatus.interactable = false;
+		buttonEnd.interactable = false;
 
 		xPosition = positionX;
 		yPosition = positionY;
@@ -549,11 +602,34 @@ public class Character : MonoBehaviour {
 			tile.gameObject.GetComponent<Tile>().plane.GetComponent<Renderer>().material.color = Color.red;
 			if (tile.occupant != null) {
 				tile.canBeClicked = true;
+				tile.gameObject.GetComponent<Tile>().plane.GetComponent<Renderer>().material.color = Color.yellow;
 			}
 		}
 
 		// Retorna os tiles pelo qual o personagem pode atacar
 		return autoAttackRange;
+	}
+
+	public void ShowMenuSkills() {
+		attacking = true;
+		menuSkills.SetActive(true);
+
+		buttonMove.GetComponent<Button>().interactable = false;
+		buttonAttack.GetComponent<Button>().interactable = false;
+		//buttonItem.GetComponent<Button>().interactable = false;
+		buttonStatus.GetComponent<Button>().interactable = false;
+		buttonEnd.GetComponent<Button>().interactable = false;
+	}
+
+	public void HideMenuSkills() {
+		attacking = false;
+		menuSkills.SetActive(false);
+
+		buttonMove.GetComponent<Button>().interactable = true;
+		buttonAttack.GetComponent<Button>().interactable = true;
+		//buttonItem.GetComponent<Button>().interactable = true;
+		buttonStatus.GetComponent<Button>().interactable = true;
+		buttonEnd.GetComponent<Button>().interactable = true;
 	}
 
 	public void HideRange(List<Tile> list) {
@@ -568,50 +644,53 @@ public class Character : MonoBehaviour {
 	}
 
 	public void ExecuteMovement(Tile target, int targetPositionX, int targetPositionY) {
-		
-		List<Tile> moveRange = ShowMovementRange(Maps.map01, xPosition, yPosition);
-		interfaceController.charFace.GetComponent<Animator>().SetBool("Appear", true);
-		// TEM QUE ESVAZIAR A POSIÇÃO INICIAL - PORRA QUE NOJO DA MINHA SOLUÇÃO
-		ResetPosition(Maps.map01);
+		if (targetPositionX >= 0 && targetPositionY >= 0) {
+			List<Tile> moveRange = ShowMovementRange(Maps.map01, xPosition, yPosition);
+			interfaceController.charFace.GetComponent<Animator>().SetBool("Appear", true);
+			// TEM QUE ESVAZIAR A POSIÇÃO INICIAL - PORRA QUE NOJO DA MINHA SOLUÇÃO
+			ResetPosition(Maps.map01);
 
-		xPosition = targetPositionX;
-		yPosition = targetPositionY;
+			xPosition = targetPositionX;
+			yPosition = targetPositionY;
 
-		HideRange(moveRange);
+			HideRange(moveRange);
 
-		target.occupant = this.gameObject;
-		target.isOccupiedByAlly = true;
-		target.plane.gameObject.GetComponent<Renderer>().material.color = target.color;
-		characterGameObject.transform.position = new Vector3(target.transform.position.x
-										, target.gameObject.transform.localScale.y
-										, target.transform.position.z);
-		
-		buttonMove.interactable = false;
-		moved = true;
+			target.occupant = this.gameObject;
+			target.isOccupiedByAlly = true;
+			target.plane.gameObject.GetComponent<Renderer>().material.color = target.color;
+			characterGameObject.transform.position = new Vector3(target.transform.position.x
+											, target.gameObject.transform.localScale.y
+											, target.transform.position.z);
 
-		RefreshHPMP();
-		RefreshStatusText();
-		RefreshStatusValues();
+			buttonMove.interactable = false;
+			moved = true;
+
+			RefreshHPMP();
+			RefreshStatusText();
+			RefreshStatusValues();
+		}
 	}
 
 	public void ExecuteAttack(Tile target, int targetPositionX, int targetPositionY) {
+		if (targetPositionX >= 0 && targetPositionY >= 0) {
+			List<Tile> attackRange = ShowAttackRange(Maps.map01, xPosition, yPosition);
 
-		List<Tile> attackRange = ShowAttackRange(Maps.map01, xPosition, yPosition);
+			HideRange(attackRange);
 
-		HideRange(attackRange);
+			buttonAttack.interactable = false;
+			//buttonSkill.interactable = false;
+			attacked = true;
+			interfaceController.charFace.GetComponent<Animator>().SetBool("Appear", true);
 
-		buttonAttack.interactable = false;
-		attacked = true;
-		interfaceController.charFace.GetComponent<Animator>().SetBool("Appear", true);
-
-		if (target.isOccupiedByAlly) {
-			Character targetAlly = target.occupant.GetComponent<Character>();
-			targetAlly.TakeHPDamage(totalCharacterAttack, targetAlly.totalCharacterResCut);
-			targetAlly.RefreshHPMP();
-		}
-		if (target.isOccupiedByEnemy) {
-			Enemy targetEnemy = target.occupant.GetComponent<Enemy>();
-			targetEnemy.TakeHPDamage(totalCharacterAttack, targetEnemy.armor);
+			if (target.isOccupiedByAlly) {
+				Character targetAlly = target.occupant.GetComponent<Character>();
+				damageCaused = targetAlly.TakeHPDamage(totalCharacterAttack, targetAlly.totalCharacterResCut);
+				targetAlly.RefreshHPMP();
+			}
+			if (target.isOccupiedByEnemy) {
+				Enemy targetEnemy = target.occupant.GetComponent<Enemy>();
+				damageCaused = targetEnemy.TakeHPDamage(totalCharacterAttack, targetEnemy.armor);
+			}
 		}
 	}
 
@@ -711,5 +790,23 @@ public class Character : MonoBehaviour {
 
 	private int SumOfTheDistanceOfTwoPoints(Tile tile1, Tile tile2) {
 		return tile1.distance + tile2.distance;
+	}
+
+	private void ShowMenuButtons() {
+		if (moved == false) {
+			buttonMove.GetComponent<Button>().interactable = true;
+		} else {
+			buttonMove.GetComponent<Button>().interactable = false;
+		}
+		if (attacked == false) {
+			buttonAttack.GetComponent<Button>().interactable = true;
+			//buttonSkill.GetComponent<Button>().interactable = true;
+		} else {
+			buttonAttack.GetComponent<Button>().interactable = false;
+			//buttonSkill.GetComponent<Button>().interactable = false;
+		}
+		//buttonItem.GetComponent<Button>().interactable = false;
+		buttonStatus.GetComponent<Button>().interactable = true;
+		buttonEnd.GetComponent<Button>().interactable = true;
 	}
 }

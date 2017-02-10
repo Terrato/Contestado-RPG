@@ -69,26 +69,30 @@ public class BattleController : MonoBehaviour {
 			if (array[unitIndex].activeSelf) {
 				if (array[unitIndex].gameObject.GetComponent<Character>()) {
 					array[unitIndex].gameObject.GetComponent<Character>().turn = true;
-					array[unitIndex].gameObject.GetComponent<Renderer>().material.color = Color.blue;
+					//array[unitIndex].gameObject.GetComponent<Renderer>().material.color = Color.blue;
 					array[unitIndex].gameObject.GetComponent<Character>().StartTurn();
 				}
 				if (array[unitIndex].gameObject.GetComponent<Enemy>()) {
 					array[unitIndex].gameObject.GetComponent<Enemy>().turn = true;
-					array[unitIndex].gameObject.GetComponent<Renderer>().material.color = Color.red;
+					//array[unitIndex].gameObject.GetComponent<Renderer>().material.color = Color.red;
 					array[unitIndex].gameObject.GetComponent<Enemy>().StartTurn();
 				}
 			} else {
-				if (unitIndex < array.Length) {
-					for (int i = unitIndex; i <= array.Length; i++) {
-						if (i + 1 <= array.Length) {
-							if (array[i + 1].activeSelf) {
-								if (array[i + 1].gameObject.GetComponent<Character>()) {
-									whoIsActive = i + 1;
+				if (unitIndex < array.Length-1) {
+					for (int i = unitIndex; i < array.Length; i++) {
+						if (i < array.Length) {
+							if (array[i].activeSelf) {
+								if (array[i].gameObject.GetComponent<Character>()) {
+									whoIsActive = i;
+									//array[unitIndex].gameObject.GetComponent<Character>().turn = true;
+									array[unitIndex].gameObject.GetComponent<Renderer>().material.color = Color.yellow;
 									array[i].gameObject.GetComponent<Character>().StartTurn();
 									break;
 								}
-								if (array[i + 1].gameObject.GetComponent<Enemy>()) {
-									whoIsActive = i + 1;
+								if (array[i].gameObject.GetComponent<Enemy>()) {
+									whoIsActive = i;
+									//array[unitIndex].gameObject.GetComponent<Enemy>().turn = true;
+									array[unitIndex].gameObject.GetComponent<Renderer>().material.color = Color.red;
 									array[i].gameObject.GetComponent<Enemy>().StartTurn();
 									break;
 								}
@@ -97,11 +101,13 @@ public class BattleController : MonoBehaviour {
 							break;
 						}
 					}
-				} else {
+				}
+				if (unitIndex == array.Length - 1){
 					for (int i = 0; i < unitIndex; i++) {
 						if (array[i].activeSelf) {
 							if (array[i].gameObject.GetComponent<Character>()) {
 								whoIsActive = i;
+								array[unitIndex].gameObject.GetComponent<Renderer>().material.color = Color.magenta;
 								array[i].gameObject.GetComponent<Character>().StartTurn();
 								break;
 							}

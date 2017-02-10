@@ -24,6 +24,10 @@ public class Cacador : CharacterClass {
 		bonusMove = 0;
 		bonusJump = 0;
 		bonusReach = 3;
+		weaponArray = new string[] { "Arco Composto", "Luger P08", "Remington M10", "Springfield1903", "Colt M1898", "Colt Walker" };
+		headArray = new string[] { "Chapéu de palha", "Chapéu de couro", "Capacete", "Cap", "Boina" };
+		bodyArray = new string[] { "Camiseta", "Colete", "Jaqueta", "Camisa" };
+		feetArray = new string[] { "Sapatos", "Botinas", "Botas" };
 	}
 
 	public override void LevelUp() {

@@ -23,6 +23,10 @@ public class Matador : CharacterClass {
 		bonusResMoral += 5;
 		bonusMove = 1;
 		bonusJump = 1;
+		weaponArray = new string[] { "Faca", "Facão", "Espada", "Machado", "Martelo", "Marreta", "Foice" };
+		headArray = new string[] { "Capacete", "Chapéu de couro", "Capuz" };
+		bodyArray = new string[] { "Jaqueta", "Colete", "Robe", "Gibão" };
+		feetArray = new string[] { "Sapatos", "Botinas", "Tênis" };
 	}
 
 	public override void LevelUp() {

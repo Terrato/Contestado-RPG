@@ -23,6 +23,10 @@ public class Padre : CharacterClass {
 		bonusResMoral += 6;
 		bonusMove += 1;
 		bonusJump += 0;
+		weaponArray = new string[] { "Galho de árv.", "Vassoura", "Bastão", "Porrete" };
+		headArray = new string[] { "Chapéu de palha", "Chapéu de couro", "Coroa de cipó" };
+		bodyArray = new string[] { "Camiseta", "Colete", "Robe", "Camisa", "Roupão" };
+		feetArray = new string[] { "Sapatos", "Botinas", "Sandalhas" };
 	}
 
 	public override void LevelUp() {

@@ -3,7 +3,6 @@ using System.Collections;
 
 public class Atirador: CharacterClass {
 
-
 	public Atirador() {
 		name = "Atirador";
 		level = 1;
@@ -25,8 +24,11 @@ public class Atirador: CharacterClass {
 		bonusMove = 0;
 		bonusJump = 1;
 		bonusReach = 4;
+		weaponArray = new string[] { "Arco Composto", "Luger P08", "Remington M10", "Springfield M1903", "Colt M1898", "Colt Walker" };
+		headArray = new string[] { "Chapéu de palha", "Chapéu de couro", "Capacete", "Cap", "Boina"};
+		bodyArray = new string[] { "Camiseta", "Colete", "Jaqueta", "Camisa" };
+		feetArray = new string[] { "Sapatos", "Botinas", "Botas" };
 	}
-
 
 	public override void LevelUp() {
 		if (level < 99) {

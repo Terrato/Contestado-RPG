@@ -46,6 +46,7 @@
 	</Reference>
   </ItemGroup>
   <ItemGroup>
+     <Compile Include="Assets\Scripts\ABS.cs" />
      <Compile Include="Assets\Scripts\ArrayOfTiles.cs" />
      <Compile Include="Assets\Scripts\BattleController.cs" />
      <Compile Include="Assets\Scripts\Character Classes\Amolador.cs" />
@@ -61,7 +62,6 @@
      <Compile Include="Assets\Scripts\Character Classes\Desempregado.cs" />
      <Compile Include="Assets\Scripts\Character Classes\Diacono.cs" />
      <Compile Include="Assets\Scripts\Character Classes\Fazendeiro.cs" />
-     <Compile Include="Assets\Scripts\Character Classes\ImperadorDoBrasil.cs" />
      <Compile Include="Assets\Scripts\Character Classes\Lenhador.cs" />
      <Compile Include="Assets\Scripts\Character Classes\Matador.cs" />
      <Compile Include="Assets\Scripts\Character Classes\Mecanico.cs" />
@@ -69,7 +69,6 @@
      <Compile Include="Assets\Scripts\Character Classes\Operario.cs" />
      <Compile Include="Assets\Scripts\Character Classes\Padeiro.cs" />
      <Compile Include="Assets\Scripts\Character Classes\Padre.cs" />
-     <Compile Include="Assets\Scripts\Character Classes\ParDeFranca.cs" />
      <Compile Include="Assets\Scripts\Character Classes\Pedreiro.cs" />
      <Compile Include="Assets\Scripts\Character Classes\Santo.cs" />
      <Compile Include="Assets\Scripts\Character.cs" />
@@ -84,8 +83,8 @@
      <Compile Include="Assets\Scripts\Money.cs" />
      <Compile Include="Assets\Scripts\ResolutionControl.cs" />
      <Compile Include="Assets\Scripts\Skills\BaseSkill.cs" />
-     <Compile Include="Assets\Scripts\Skills\BaseSkill1.cs" />
      <Compile Include="Assets\Scripts\Tile.cs" />
+     <Compile Include="Assets\Scripts\Title.cs" />
      <Compile Include="Assets\Scripts\WorldMap\Battle.cs" />
      <Compile Include="Assets\Scripts\WorldMap\City.cs" />
      <Compile Include="Assets\Scripts\WorldMap\Save.cs" />

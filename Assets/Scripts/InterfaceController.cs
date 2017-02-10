@@ -5,7 +5,7 @@ using System.Collections;
 
 public class InterfaceController : MonoBehaviour  {
 	public GameObject battlefieldView, orthographicView; // Camera da visão geral e da visão de mira respectivamente
-	public GameObject charFace;
+	public GameObject charFace, attackBattleScreen, attacker, defender, damageText;
 	private static int[] cursorPositionArray = new int[2];
 	public GameObject cursor;
 	public Menu menu;
@@ -18,10 +18,12 @@ public class InterfaceController : MonoBehaviour  {
 	private float zLimit; // Auxiliar para o distanciamento da câmera
 	public Canvas canvas; // Canvas. A princípio é mais auxiliar do que qualquer coisa
 	public static bool currentCameraState; // false = Battlefield View, true = Orthographic View
-	private int yCoordinateCursor = 0, xCoordinateCursor = 0;
+	public int xCoordinateCursor = 0, yCoordinateCursor = 0;
 
 	// Ao "acordar" define tais variáveis
 	void Awake () {
+
+		currentCameraState = false;
 
 		menuOptionLock = false;
 		menuActiveLock = false;
@@ -127,9 +129,16 @@ public class InterfaceController : MonoBehaviour  {
 	// UTILIZAR ESSA MERDA
 	public void CursorAim(GameObject player) {
 		if (menuOptionLock == false && menuActiveLock == false) {
-			xCoordinateCursor = player.GetComponent<Character>().xPosition;
-			yCoordinateCursor = player.GetComponent<Character>().yPosition;
-			orthographicView.transform.position = new Vector3(player.transform.position.x, 30, player.transform.position.z);
+			if (player.GetComponent<Character>()) {
+				xCoordinateCursor = player.GetComponent<Character>().xPosition;
+				yCoordinateCursor = player.GetComponent<Character>().yPosition;
+				orthographicView.transform.position = new Vector3(player.transform.position.x, 30, player.transform.position.z);	
+			}
+			if (player.GetComponent<Enemy>()) {
+				xCoordinateCursor = player.GetComponent<Enemy>().xPosition;
+				yCoordinateCursor = player.GetComponent<Enemy>().yPosition;
+				orthographicView.transform.position = new Vector3(player.transform.position.x, 30, player.transform.position.z);
+			}
 		}
 	}
 
@@ -152,6 +161,26 @@ public class InterfaceController : MonoBehaviour  {
 
 	}
 
-
+	public void ShowAttackScreen(GameObject attackerA, GameObject defenderD) {
+		if (attackerA.GetComponent<Character>()) {
+			attacker.GetComponent<Image>().sprite = attackerA.GetComponent<Character>().characterClass.charAttack;
+			damageText.GetComponent<Text>().text = attackerA.GetComponent<Character>().damageCaused.ToString();
+		}
+		if (attackerA.GetComponent<Enemy>()) {
+			attacker.GetComponent<Image>().sprite = attackerA.GetComponent<Enemy>().charAttack;
+			damageText.GetComponent<Text>().text = attackerA.GetComponent<Enemy>().damageCaused.ToString();
+		}
+		if (defenderD.GetComponent<Character>()) {
+			defender.GetComponent<Image>().sprite = defenderD.GetComponent<Character>().characterClass.charAttack;
+		}
+		if (defenderD.GetComponent<Enemy>()) {
+			defender.GetComponent<Image>().sprite = defenderD.GetComponent<Enemy>().charAttack;
+		}
+		attackBattleScreen.SetActive(true);
+		attackBattleScreen.GetComponent<Animator>().SetTrigger("Hide");
+		attackBattleScreen.GetComponent<Animator>().SetTrigger("ShowDamage");
+		attackBattleScreen.GetComponent<Animator>().SetTrigger("TakeDamage");
+		attackBattleScreen.GetComponent<Animator>().SetTrigger("Attack");
+	}
 
 }
